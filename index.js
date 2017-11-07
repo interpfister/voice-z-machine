@@ -4,7 +4,7 @@ const spawn = require('cross-spawn');
 
 const invokeShell = (done, query) => {
 console.log('invoking shell');  
-  const child = spawn('npm', ['start']);
+  const child = spawn('npm', ['start-zvm']);
   console.log('shell invoked');
 	child.on('error', function( err ){ throw err });
   child.stderr.on('data', (data) => {
