@@ -5,10 +5,12 @@
   "author": "Ryan Pfister <interpfister@gmail.com>",
   "dependencies": {
     "cross-spawn": "^5.1.0",
+    "express": "^4.16.2",
     "ifvms": "^1.1.2"
   },
   "scripts": {
-    "start": "zvm anchor.z8",
+    "start-zvm": "zvm anchor.z8",
+    "start": "node server.js",
     "test": "node test.js"
   }
 }

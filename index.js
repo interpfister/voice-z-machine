@@ -5,6 +5,9 @@ const spawn = require('cross-spawn');
 const invokeShell = (done, query) => {
     const child = spawn('npm', ['start']);
 	child.on('error', function( err ){ throw err });
+  child.stderr.on('data', (data) => {
+	    console.log('err', String(data));
+	});
 	let returnIndex = 0;
 	child.stdout.on('data', (data) => {
 	  const text = String(data);
