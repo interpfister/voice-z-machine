@@ -11,6 +11,7 @@ console.log('invoking shell');
 	    console.log('err', String(data));
 	});
 	let returnIndex = 0;
+  let returnNext = false;
 	child.stdout.on('data', (data) => {
 	  const text = String(data) && String(data).trim();
     if(text) {
@@ -18,13 +19,16 @@ console.log('invoking shell');
       if(returnIndex === 2) {
         child.stdin.write('R');
       }
-      if(returnIndex === 3) {
+      else if(returnIndex === 3) {
         child.stdin.write('testsave\n');
       }
-      if(returnIndex === 4) {
+      else if(returnIndex === 4) {
         child.stdin.write(`${query}\n`);
       }
-      if(returnIndex === 6) {
+      else if(text.includes(query)) {
+        returnNext = true;
+      }
+      else if(returnNext) {
         child.stdin.pause();
         child.kill();
         done(text);
