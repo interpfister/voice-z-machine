@@ -13,6 +13,12 @@ console.log('invoking shell');
 	let returnIndex = 0;
   let returnNext = false;
   let returnText = "";
+  let saving = false;
+  
+  const saveAndFinish = (text) => {
+    child.stdin.write('save\n');
+    saving = true;
+  }
   
   const finish = (text) => {
     child.stdin.pause();
@@ -20,15 +26,21 @@ console.log('invoking shell');
     done(text);
   }
   
+  const saveFile = 'testsave';
 	child.stdout.on('data', (data) => {
 	  const text = String(data) && String(data).trim();
     if(text) {
+      if(saving) {
+        child.stdin.write(`${saveFile}\n`);
+        finish(returnText);
+      }
+      
       console.log(`cmd response ${returnIndex}:`, text);
       if(returnIndex === 2) {
         child.stdin.write('R');
       }
       else if(returnIndex === 3) {
-        child.stdin.write('testsave\n');
+        child.stdin.write(`${saveFile}\n`);
       }
       else if(returnIndex === 4) {
         child.stdin.write(`${query}\n`);
@@ -37,12 +49,12 @@ console.log('invoking shell');
         returnText = text.replace(query, '');
         returnNext = true;
         setTimeout(() => {
-          finish(returnText);
+          saveAndFinish(returnText);
         }, 1000);
       }
       else if(returnNext) {
         returnText = returnText.concat(text);
-        finish(returnText);
+        saveAndFinish(returnText);
       }	
       
       returnIndex = returnIndex + 1; //we only want to return the last line
