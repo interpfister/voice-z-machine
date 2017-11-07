@@ -7,7 +7,6 @@ app.use(bodyParser);
 app.get('/', (req, res) => res.send('Hello World!'))
 
 app.post('/', (req, res) => {
-  console.log(req
   const body = req.body;
   const event = {
     httpMethod: 'POST',
