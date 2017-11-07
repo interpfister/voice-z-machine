@@ -12,6 +12,14 @@ console.log('invoking shell');
 	});
 	let returnIndex = 0;
   let returnNext = false;
+  let returnText = "";
+  
+  const finish = (text) => {
+    child.stdin.pause();
+    child.kill();
+    done(text);
+  }
+  
 	child.stdout.on('data', (data) => {
 	  const text = String(data) && String(data).trim();
     if(text) {
@@ -26,12 +34,15 @@ console.log('invoking shell');
         child.stdin.write(`${query}\n`);
       }
       else if(text.includes(query)) {
+        returnText = text.replace(query, '');
         returnNext = true;
+        setTimeout(() => {
+          finish(returnText);
+        }, 1000);
       }
       else if(returnNext) {
-        child.stdin.pause();
-        child.kill();
-        done(text);
+        returnText = returnText.concat(text);
+        finish(returnText);
       }	
       
       returnIndex = returnIndex + 1; //we only want to return the last line
