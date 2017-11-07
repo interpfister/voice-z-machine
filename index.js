@@ -12,7 +12,7 @@ console.log('invoking shell');
 	});
 	let returnIndex = 0;
 	child.stdout.on('data', (data) => {
-	  const text = String(data);
+	  const text = String(data) && String(data).trim();
     if(text) {
       console.log(`cmd response ${returnIndex}:`, text);
       if(returnIndex === 2) {
@@ -21,10 +21,10 @@ console.log('invoking shell');
       if(returnIndex === 3) {
         child.stdin.write('testsave\n');
       }
-      if(returnIndex === 6) {
+      if(returnIndex === 4) {
         child.stdin.write(`${query}\n`);
       }
-      if(returnIndex === 8) {
+      if(returnIndex === 6) {
         child.stdin.pause();
         child.kill();
         done(text);
