@@ -12,7 +12,12 @@ app.post('/', (req, res) => {
     httpMethod: 'POST',
     body: JSON.stringify(body),
   }
-  res.send(handler(event));
+  
+  const callback = (something, result) => {
+    res.send(result.body);
+  }
+  
+  handler(event, {}, callback);
 });
 
 const port = process.env.PORT || 3000;
