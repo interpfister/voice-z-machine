@@ -1,0 +1,14 @@
+{
+  "name": "voice-z-machine",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Ryan Pfister <interpfister@gmail.com>",
+  "dependencies": {
+    "cross-spawn": "^5.1.0",
+    "ifvms": "^1.1.2"
+  },
+  "scripts": {
+    "start": "zvm anchor.z8",
+    "test": "node test.js"
+  }
+}
