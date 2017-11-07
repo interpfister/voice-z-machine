@@ -12,11 +12,11 @@ app.post('/', (req, res) => {
     httpMethod: 'POST',
     body: JSON.stringify(body),
   }
-  
+  console.log(req);
   const callback = (something, result) => {
     res.send(result.body);
   }
-  
+
   handler(event, {}, callback);
 });
 
