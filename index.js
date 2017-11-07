@@ -13,22 +13,25 @@ console.log('invoking shell');
 	let returnIndex = 0;
 	child.stdout.on('data', (data) => {
 	  const text = String(data);
-	  console.log(`cmd response ${returnIndex}:`, text);
-	  if(returnIndex === 2) {
-		child.stdin.write('R');
-	  }
-	  if(returnIndex === 3) {
-		child.stdin.write('testsave\n');
-	  }
-	  if(returnIndex === 6) {
-		child.stdin.write(`${query}\n`);
-	  }
-	  if(returnIndex === 8) {
-		child.stdin.pause();
-		child.kill();
-		done(text);
-	  }	
-	  returnIndex = returnIndex + 1; //we only want to return the last line
+    if(text) {
+      console.log(`cmd response ${returnIndex}:`, text);
+      if(returnIndex === 2) {
+        child.stdin.write('R');
+      }
+      if(returnIndex === 3) {
+        child.stdin.write('testsave\n');
+      }
+      if(returnIndex === 6) {
+        child.stdin.write(`${query}\n`);
+      }
+      if(returnIndex === 8) {
+        child.stdin.pause();
+        child.kill();
+        done(text);
+      }	
+      
+      returnIndex = returnIndex + 1; //we only want to return the last line
+    }
 	});
 };
 
