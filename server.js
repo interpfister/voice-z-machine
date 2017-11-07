@@ -2,21 +2,22 @@ const express = require('express')
 const app = express()
 const handler = require('./index').handler;
 const bodyParser = require('body-parser');
-app.use(bodyParser);
+
+const jsonParser = bodyParser.json();
 
 app.get('/', (req, res) => res.send('Hello World!'))
 
-app.post('/', (req, res) => {
+app.post('/', jsonParser, (req, res) => {
   const body = req.body;
   const event = {
     httpMethod: 'POST',
     body: JSON.stringify(body),
   }
-  console.log(req);
+  
   const callback = (something, result) => {
     res.send(result.body);
   }
-
+  console.log(`calling handler with: ${body}`);
   handler(event, {}, callback);
 });
 
