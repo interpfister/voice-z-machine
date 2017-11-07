@@ -3,7 +3,9 @@
 const spawn = require('cross-spawn');
 
 const invokeShell = (done, query) => {
-    const child = spawn('npm', ['start']);
+console.log('invoking shell');  
+  const child = spawn('npm', ['start']);
+  console.log('shell invoked');
 	child.on('error', function( err ){ throw err });
   child.stderr.on('data', (data) => {
 	    console.log('err', String(data));
@@ -31,7 +33,7 @@ const invokeShell = (done, query) => {
 };
 
 exports.handler = (event, context, callback) => {
-    // console.log('Received event:', JSON.stringify(event, null, 2));
+    console.log('Received event:', JSON.stringify(event, null, 2));
 
     const done = (speech, err) => callback(null, {
         statusCode: err ? '400' : '200',
