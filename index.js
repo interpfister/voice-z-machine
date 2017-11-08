@@ -15,6 +15,7 @@ console.log('invoking shell');
   let returnText = "";
   let saving = false;
   let wasSaving = false;
+  let restoreCompleted = false;
   const saveAndFinish = () => {
     child.stdin.write('save\n');
     saving = true;
@@ -29,6 +30,7 @@ console.log('invoking shell');
   
   const saveFile = 'testsave';
   let backupTimeout;
+  let isRestoring = false;
 	child.stdout.on('data', (data) => {
 	  const text = String(data) && String(data).trim();
     if(text) {
@@ -41,14 +43,14 @@ console.log('invoking shell');
 	  else if(wasSaving && text.includes('Ok.')) {
 		finish(returnText);
 	  }
-      else if(returnIndex === 2) {
-        child.stdin.write('R');
+      else if(text.includes('to restore; any other key to begin')) {
+        isRestoring = true;
+		child.stdin.write('R');
       }
-      else if(returnIndex === 3) {
+      else if(isRestoring) {
         child.stdin.write(`${saveFile}\n`);
-      }
-      else if(returnIndex === 4) {
-        child.stdin.write(`${query}\n`);
+		isRestoring = false;
+		restoreCompleted = true;
       }
       else if(text.includes(query)) {
         returnText = text.replace(query, '');
@@ -63,9 +65,12 @@ console.log('invoking shell');
 			typeof backupTimeout === 'function' && backupTimeout();
 			saveAndFinish();
 		}
-      }	
+      }
+      else if(restoreCompleted && text.includes('>')) {
+        child.stdin.write(`${query}\n`);
+      }
       
-      returnIndex = returnIndex + 1; //we only want to return the last line
+      returnIndex = returnIndex + 1;
     }
 	});
 };
