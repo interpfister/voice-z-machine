@@ -144,10 +144,14 @@ exports.handler = (event, context, callback) => {
         done('No original request source found', true);
         return;
       }
-      if(!body.originalRequest.data || !body.originalRequest.data.user || !body.originalRequest.data.user.user_id) {
-        done('No user_id found', true);
+      
+      let username = 'default';
+      
+      if(body.originalRequest.data && body.originalRequest.data.user && body.originalRequest.data.user.user_id) {
+        username = body.originalRequest.data.user.user_id;
       }
-      const saveFilename = `${body.originalRequest.source}:${body.originalRequest.data.user.user_id}`;
+      
+      const saveFilename = `${body.originalRequest.source}:${username}`;
       
       downloadFileFromS3(saveFilename).then(() =>
         invokeShell(done, query, saveFilename))
