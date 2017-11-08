@@ -14,10 +14,11 @@ console.log('invoking shell');
   let returnNext = false;
   let returnText = "";
   let saving = false;
-  
-  const saveAndFinish = (text) => {
+  let wasSaving = false;
+  const saveAndFinish = () => {
     child.stdin.write('save\n');
     saving = true;
+	returnNext = false;
   }
   
   const finish = (text) => {
@@ -27,16 +28,20 @@ console.log('invoking shell');
   }
   
   const saveFile = 'testsave';
+  let backupTimeout;
 	child.stdout.on('data', (data) => {
 	  const text = String(data) && String(data).trim();
     if(text) {
-      if(saving) {
-        child.stdin.write(`${saveFile}\n`);
-        finish(returnText);
-      }
-      
       console.log(`cmd response ${returnIndex}:`, text);
-      if(returnIndex === 2) {
+	  if(saving) {
+		  saving = false;
+		  wasSaving = true;
+        child.stdin.write(`${saveFile}\n`);
+      }
+	  else if(wasSaving && text.includes('Ok.')) {
+		finish(returnText);
+	  }
+      else if(returnIndex === 2) {
         child.stdin.write('R');
       }
       else if(returnIndex === 3) {
@@ -48,14 +53,15 @@ console.log('invoking shell');
       else if(text.includes(query)) {
         returnText = text.replace(query, '');
         returnNext = true;
-        setTimeout(() => {
-          saveAndFinish(returnText);
+        backupTimeout = setTimeout(() => {
+          saveAndFinish();
         }, 1000);
       }
       else if(returnNext) {
         returnText = returnText.concat(text);
 		if(returnText.includes('>')) {
-			saveAndFinish(returnText);
+			typeof backupTimeout === 'function' && backupTimeout();
+			saveAndFinish();
 		}
       }	
       

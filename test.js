@@ -2,7 +2,7 @@ const index = require('./index');
 
 const body = {
 	result: {
-		resolvedQuery: 'look',
+		resolvedQuery: 'examine boxes',
 	}
 }
 const event = {
