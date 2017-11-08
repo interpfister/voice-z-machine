@@ -25,7 +25,7 @@ console.log('invoking shell');
   const finish = (text) => {
     child.stdin.pause();
     child.kill();
-    done(text.replace('>','').replace(new RegExp(/\n/, 'g'),':'));
+    done(text.replace('>',' ').replace(new RegExp(/\n/, 'g'),':'));
   }
   
   const saveFile = 'testsave';
