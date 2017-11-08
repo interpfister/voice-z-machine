@@ -3,7 +3,15 @@ const index = require('./index');
 const body = {
 	result: {
 		resolvedQuery: 'look',
-	}
+	},
+  originalRequest: {
+    source: 'google',
+    data: {
+      user: {
+        user_id: 'test-ryan',
+      }
+    },
+  },
 }
 const event = {
 	httpMethod: 'POST',

@@ -1,9 +1,50 @@
 'use strict';
 
 const spawn = require('cross-spawn');
+const s3 = require('s3');
 
-const invokeShell = (done, query) => {
-console.log('invoking shell');  
+const client = s3.createClient({
+  s3Options: {
+    region: 'us-east-1',
+  }
+});
+
+const createParams = (filename) => {
+  return {
+    localFile: filename,
+    s3Params: {
+      Bucket: "voice-z-machine",
+      Key: filename,
+    },
+  };
+}
+
+const handleS3EventEmitter = (emitter) => {
+  return new Promise((resolve, reject) => {
+    emitter.on('error', function(err) {
+      console.error("error:", err.stack);
+      reject(err.stack);
+    });
+    emitter.on('progress', function() {
+      console.log("progress", emitter.progressTotal);
+    });
+    emitter.on('end', function() {
+      console.log("done uploading");
+      resolve('done uploading');
+    });
+  });
+}
+
+const uploadFileToS3 = (filename) => {
+  return handleS3EventEmitter(client.uploadFile(createParams(`${filename}.glksave`)));
+}
+
+const downloadFileFromS3 = (filename) => {
+  return handleS3EventEmitter(client.downloadFile(createParams(`${filename}.glksave`)));
+}
+
+const invokeShell = (done, query, saveFilename, newFile = false) => {
+console.log('invoking shell');
   const child = spawn('npm', ['run','start-zvm']);
   console.log('shell invoked');
 	child.on('error', function( err ){ throw err });
@@ -28,7 +69,6 @@ console.log('invoking shell');
     done(text.replace('>',' ').replace(new RegExp(/\n/, 'g'),':'));
   }
   
-  const saveFile = 'testsave';
   let backupTimeout;
   let isRestoring = false;
 	child.stdout.on('data', (data) => {
@@ -38,17 +78,18 @@ console.log('invoking shell');
 	  if(saving) {
 		  saving = false;
 		  wasSaving = true;
-        child.stdin.write(`${saveFile}\n`);
+        child.stdin.write(`${saveFilename}\n`);
       }
 	  else if(wasSaving && text.includes('Ok.')) {
-		finish(returnText);
+      uploadFileToS3(saveFilename).then(() => finish(returnText));
 	  }
       else if(text.includes('to restore; any other key to begin')) {
         isRestoring = true;
 		child.stdin.write('R');
       }
       else if(isRestoring) {
-        child.stdin.write(`${saveFile}\n`);
+        const filenameToRestore = newFile ? 'testsave' : saveFilename; //Restore the default template if it's a new file
+        child.stdin.write(`${filenameToRestore}\n`);
 		isRestoring = false;
 		restoreCompleted = true;
       }
@@ -97,8 +138,20 @@ exports.handler = (event, context, callback) => {
             const query = body.result && body.result.resolvedQuery;
 			if(!query) {
 				done('No query found', true);
+        return;
 			}
-			invokeShell(done, query);
+      if(!body.originalRequest.source) {
+        done('No original request source found', true);
+        return;
+      }
+      if(!body.originalRequest.data || !body.originalRequest.data.user || !body.originalRequest.data.user.user_id) {
+        done('No user_id found', true);
+      }
+      const saveFilename = `${body.originalRequest.source}:${body.originalRequest.data.user.user_id}`;
+      
+      downloadFileFromS3(saveFilename).then(() =>
+        invokeShell(done, query, saveFilename))
+        .catch(() => invokeShell(done, query, saveFilename, true));
             break;
         case 'PUT':
             break;
