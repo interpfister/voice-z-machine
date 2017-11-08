@@ -23,7 +23,7 @@ console.log('invoking shell');
   const finish = (text) => {
     child.stdin.pause();
     child.kill();
-    done(text);
+    done(text.replace('>','').replace(new RegExp(/\n/, 'g'),':'));
   }
   
   const saveFile = 'testsave';
@@ -54,7 +54,9 @@ console.log('invoking shell');
       }
       else if(returnNext) {
         returnText = returnText.concat(text);
-        saveAndFinish(returnText);
+		if(returnText.includes('>')) {
+			saveAndFinish(returnText);
+		}
       }	
       
       returnIndex = returnIndex + 1; //we only want to return the last line
