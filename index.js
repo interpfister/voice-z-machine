@@ -57,6 +57,7 @@ console.log('invoking shell');
   let saving = false;
   let wasSaving = false;
   let restoreCompleted = false;
+  let commandEntered = false;
   const saveAndFinish = () => {
     child.stdin.write('save\n');
     saving = true;
@@ -81,7 +82,8 @@ console.log('invoking shell');
         child.stdin.write(`${saveFilename}\n`);
       }
 	  else if(wasSaving && text.includes('Ok.')) {
-      uploadFileToS3(saveFilename).then(() => finish(returnText));
+      uploadFileToS3(saveFilename).then(() => finish(returnText))
+        .catch(() => finish(`${returnText} - WARNING: Save to Amazon S3 failed.`));
 	  }
       else if(text.includes('to restore; any other key to begin')) {
         isRestoring = true;
@@ -107,7 +109,8 @@ console.log('invoking shell');
 			saveAndFinish();
 		}
       }
-      else if(restoreCompleted && text.includes('>')) {
+      else if(restoreCompleted && !commandEntered && text.includes('>')) {
+        commandEntered = true;
         child.stdin.write(`${query}\n`);
       }
       
