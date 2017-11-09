@@ -103,7 +103,7 @@ console.log('invoking shell');
         }, 1000);
       }
       else if(returnNext) {
-        returnText = returnText.concat(text);
+        returnText = returnText.concat(`:${text}`);
 		if(returnText.includes('>')) {
 			typeof backupTimeout === 'function' && backupTimeout();
 			saveAndFinish();
