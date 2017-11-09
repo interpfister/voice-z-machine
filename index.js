@@ -147,11 +147,13 @@ exports.handler = (event, context, callback) => {
       
       let username = 'default';
       
-      if(body.originalRequest.data && body.originalRequest.data.user && body.originalRequest.data.user.user_id) {
+      if(body.originalRequest.source.includes('google') && body.originalRequest.data && body.originalRequest.data.user && body.originalRequest.data.user.user_id) {
         username = body.originalRequest.data.user.user_id;
+      } else if (body.originalRequest.source.includes('slack') && body.originalRequest.data && body.originalRequest.data.user) {
+        username = body.originalRequest.data.user;
       }
       
-      const saveFilename = `${body.originalRequest.source}:${username}`;
+      const saveFilename = `${body.originalRequest.source}_${username}`;
       
       downloadFileFromS3(saveFilename).then(() =>
         invokeShell(done, query, saveFilename))
