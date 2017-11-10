@@ -1,50 +1,13 @@
-'use strict';
+import makeStore from './store';
+import spawn from 'cross-spawn';
+import * as Actions from './actions';
+import subscribe from './subscriber';
 
-const spawn = require('cross-spawn');
-const s3 = require('s3');
-
-const client = s3.createClient({
-  s3Options: {
-    region: 'us-east-1',
-  }
-});
-
-const createParams = (filename) => {
-  return {
-    localFile: filename,
-    s3Params: {
-      Bucket: "voice-z-machine",
-      Key: filename,
-    },
-  };
-}
-
-const handleS3EventEmitter = (emitter) => {
-  return new Promise((resolve, reject) => {
-    emitter.on('error', function(err) {
-      console.error("error:", err.stack);
-      reject(err.stack);
-    });
-    emitter.on('progress', function() {
-      console.log("progress", emitter.progressTotal);
-    });
-    emitter.on('end', function() {
-      console.log("done uploading");
-      resolve('done uploading');
-    });
-  });
-}
-
-const uploadFileToS3 = (filename) => {
-  return handleS3EventEmitter(client.uploadFile(createParams(`${filename}.glksave`)));
-}
-
-const downloadFileFromS3 = (filename) => {
-  return handleS3EventEmitter(client.downloadFile(createParams(`${filename}.glksave`)));
-}
+const store = makeStore();
+subscribe(store);
 
 const invokeShell = (done, query, saveFilename, newFile = false) => {
-console.log('invoking shell');
+  console.log('invoking shell');
   const child = spawn('npm', ['run','start-zvm']);
   console.log('shell invoked');
 	child.on('error', function( err ){ throw err });
@@ -58,32 +21,19 @@ console.log('invoking shell');
   let wasSaving = false;
   let restoreCompleted = false;
   let commandEntered = false;
-  const saveAndFinish = () => {
-    child.stdin.write('save\n');
-    saving = true;
-	returnNext = false;
-  }
-  
-  const finish = (text) => {
-    child.stdin.pause();
-    child.kill();
-    done(text.replace('>',' ').replace(new RegExp(/\n/, 'g'),':'));
-  }
-  
+
   let backupTimeout;
   let isRestoring = false;
 	child.stdout.on('data', (data) => {
-	  const text = String(data) && String(data).trim();
+    const text = String(data) && String(data).trim();
+    
     if(text) {
       console.log(`cmd response ${returnIndex}:`, text);
-	  if(saving) {
-		  saving = false;
-		  wasSaving = true;
-        child.stdin.write(`${saveFilename}\n`);
-      }
+      store.dispatch(Actions.process(child, text));
+    }
+
 	  else if(wasSaving && text.includes('Ok.')) {
-      uploadFileToS3(saveFilename).then(() => finish(returnText))
-        .catch(() => finish(`${returnText} - WARNING: Save to Amazon S3 failed.`));
+      
 	  }
       else if(text.includes('to restore; any other key to begin')) {
         isRestoring = true;

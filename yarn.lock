@@ -528,6 +528,14 @@ read-pkg@^2.0.0:
     normalize-package-data "^2.3.2"
     path-type "^2.0.0"
 
+redux-machine@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/redux-machine/-/redux-machine-1.2.0.tgz#fd7169c18e50eb8bfa9fdd6ef7f7542364aa5923"
+
+redux-thunk@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/redux-thunk/-/redux-thunk-2.2.0.tgz#e615a16e16b47a19a515766133d1e3e99b7852e5"
+
 require-directory@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/require-directory/-/require-directory-2.1.1.tgz#8c64ad5fd30dab1c976e2344ffe7f792a6a6df42"
