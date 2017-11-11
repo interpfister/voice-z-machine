@@ -52,7 +52,7 @@ const rootReducer = createMachine({
    READY_FOR_SAVE_FILENAME: typeMatchReducer('SAVE_FILENAME_ENTERED', 'WAITING_FOR_SAVE_RESPONSE'),
    WAITING_FOR_SAVE_RESPONSE: textMatchReducer('Ok.', 'READY_TO_FINISH'),
    READY_TO_FINISH: typeMatchReducer('SAVED_FILE_AND_CLOSED_CHILD', 'FINISHED'),
-   FINISHED: () => {
+   FINISHED: (state) => {
     return state; // no actions to monitor for - we should be done now
   },
 });
