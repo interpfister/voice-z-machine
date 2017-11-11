@@ -2,7 +2,7 @@ const index = require('./index');
 
 const body = {
 	result: {
-		resolvedQuery: 'look',
+		resolvedQuery: 'south',
 	},
   originalRequest: {
     source: 'google',

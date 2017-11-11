@@ -4,9 +4,8 @@ const Actions = require('./actions');
 const subscribe = require('./subscriber');
 const downloadFileFromS3 = require('./s3-functions').downloadFileFromS3;
 
-const store = makeStore();
-
 const invokeShell = (done, query, saveFilename, newFile = false) => {
+  const store = makeStore();
   const child = spawn('npm', ['run','start-zvm']);
 	child.on('error', function( err ){ throw err });
   child.stderr.on('data', (data) => {
@@ -32,7 +31,7 @@ const invokeShell = (done, query, saveFilename, newFile = false) => {
 };
 
 exports.handler = (event, context, callback) => {
-    console.log('Received event:', JSON.stringify(event, null, 2));
+    console.log('START: Received event:', JSON.stringify(event, null, 2));
 
     const done = (speech, err) => callback(null, {
         statusCode: err ? '400' : '200',
