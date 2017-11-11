@@ -1,4 +1,4 @@
-import s3 from 's3';
+const s3 = require('s3');
 
 const client = s3.createClient({
   s3Options: {
@@ -19,24 +19,29 @@ const createParams = (filename) => {
 const handleS3EventEmitter = (emitter) => {
   return new Promise((resolve, reject) => {
     emitter.on('error', function(err) {
-      console.error("error:", err.stack);
+      // console.error("error:", err.stack);
       reject(err.stack);
     });
     emitter.on('progress', function() {
-      console.log("progress", emitter.progressTotal);
+      // console.log("progress", emitter.progressTotal);
     });
     emitter.on('end', function() {
-      console.log("done uploading");
-      resolve('done uploading');
+      // console.log("done download/upload");
+      resolve('done download/upload');
     });
   });
 }
 
 
-export const uploadFileToS3 = (filename) => {
+const uploadFileToS3 = (filename) => {
   return handleS3EventEmitter(client.uploadFile(createParams(`${filename}.glksave`)));
 }
 
-export const downloadFileFromS3 = (filename) => {
+const downloadFileFromS3 = (filename) => {
   return handleS3EventEmitter(client.downloadFile(createParams(`${filename}.glksave`)));
+}
+
+module.exports = {
+  uploadFileToS3,
+  downloadFileFromS3
 }
