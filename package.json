@@ -8,11 +8,15 @@
     "cross-spawn": "^5.1.0",
     "express": "^4.16.2",
     "ifvms": "^1.1.2",
+    "redux": "^3.7.2",
+    "redux-machine": "^1.2.0",
+    "redux-thunk": "^2.2.0",
     "s3": "^4.4.0"
   },
   "scripts": {
     "start-zvm": "zvm anchor.z8",
     "start": "node server.js",
-    "test": "node test.js"
+    "test": "node test.js",
+    "debug": "node-debug -p 7070 test.js"
   }
 }
