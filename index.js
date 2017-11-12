@@ -6,7 +6,7 @@ const downloadFileFromS3 = require('./s3-functions').downloadFileFromS3;
 
 const invokeShell = (done, query, saveFilename, newFile = false) => {
   const store = makeStore();
-  const child = spawn('npm', ['run','start-zvm']);
+  const child = spawn('npm', ['run','start-anchorhead']);
 	child.on('error', function( err ){ throw err });
   child.stderr.on('data', (data) => {
 	    console.log('err', String(data));

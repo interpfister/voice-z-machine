@@ -6,7 +6,7 @@ const initialState = {
 }
 
 const logState = (state, action) => {
-  (process.env.REDUX_LOGGING !== false) && console.log(`ACTION: ${JSON.stringify(action)} -- STATE: ${JSON.stringify(state)}`);
+  process.env.REDUX_LOGGING && console.log(`ACTION: ${JSON.stringify(action)} -- STATE: ${JSON.stringify(state)}`);
 }
 const textMatchReducer = (textToMatch, newStatus) => {
   return (state = initialState, action) => {
