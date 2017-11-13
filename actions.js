@@ -21,19 +21,9 @@ const Actions = (child) => {
 
   this.enterRestoreCommand = () => commandAndReturn('RESTORE_COMMAND_ENTERED')('R');
 
-  this.enterBlankCommand = () => {
-    commandWithNewlineAndReturn('BLANK_COMMAND_ENTERED')('');
-    commandWithNewlineAndReturn('BLANK_COMMAND_ENTERED')('');
-    commandWithNewlineAndReturn('BLANK_COMMAND_ENTERED')('');
-    return commandWithNewlineAndReturn('BLANK_COMMAND_ENTERED')('');
-  }
+  this.enterBlankCommand = () => commandWithNewlineAndReturn('BLANK_COMMAND_ENTERED')('');
 
-  this.enterNoInstructionsCommand = () => {
-    commandWithNewlineAndReturn('NO_INSTRUCTIONS_COMMAND_ENTERED')('N');
-    commandWithNewlineAndReturn('NO_INSTRUCTIONS_COMMAND_ENTERED')(''); //need some newlines in photopia to get through intro text
-    commandWithNewlineAndReturn('NO_INSTRUCTIONS_COMMAND_ENTERED')('');
-    return commandWithNewlineAndReturn('NO_INSTRUCTIONS_COMMAND_ENTERED')('');
-  }
+  this.enterNoInstructionsCommand = () => commandWithNewlineAndReturn('NO_INSTRUCTIONS_COMMAND_ENTERED')('N');
 
   this.enterRestoreFilename = commandWithNewlineAndReturn('RESTORE_FILENAME_ENTERED');
   
