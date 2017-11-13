@@ -3,7 +3,7 @@ const yesno = require('yesno');
 
 const body = {
 	result: {
-		resolvedQuery: 'change game to anchorhead',
+		resolvedQuery: 'look',
 	},
   originalRequest: {
     source: 'google',
