@@ -9,6 +9,7 @@
     "cross-spawn": "^5.1.0",
     "express": "^4.16.2",
     "ifvms": "^1.1.2",
+    "reduce-reducers": "^0.1.2",
     "redux": "^3.7.2",
     "redux-machine": "^1.2.0",
     "redux-thunk": "^2.2.0",
