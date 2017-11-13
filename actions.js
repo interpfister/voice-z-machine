@@ -21,7 +21,12 @@ const Actions = (child) => {
 
   this.enterRestoreCommand = () => commandAndReturn('RESTORE_COMMAND_ENTERED')('R');
 
-  this.enterBlankCommand = () => commandWithNewlineAndReturn('BLANK_COMMAND_ENTERED')('');
+  this.enterBlankCommand = () => {
+    commandWithNewlineAndReturn('BLANK_COMMAND_ENTERED')('');
+    commandWithNewlineAndReturn('BLANK_COMMAND_ENTERED')('');
+    commandWithNewlineAndReturn('BLANK_COMMAND_ENTERED')('');
+    return commandWithNewlineAndReturn('BLANK_COMMAND_ENTERED')('');
+  }
 
   this.enterNoInstructionsCommand = () => {
     commandWithNewlineAndReturn('NO_INSTRUCTIONS_COMMAND_ENTERED')('N');
