@@ -3,10 +3,12 @@ const spawn = require('cross-spawn');
 const Actions = require('./actions');
 const subscribe = require('./subscriber');
 const downloadFileFromS3 = require('./s3-functions').downloadFileFromS3;
+const getSelectedGame = require('./dynamo-functions').getSelectedGame;
+const updateSelectedGame = require('./dynamo-functions').updateSelectedGame;
 
-const invokeShell = (done, query, saveFilename, newFile = false) => {
-  const store = makeStore();
-  const child = spawn('npm', ['run','start-anchorhead']);
+const invokeShell = (done, query, saveFilename, newFile = false, selectedGame) => {
+  const store = makeStore(selectedGame);
+  const child = spawn('npm', ['run',`start-${selectedGame}`]);
 	child.on('error', function( err ){ throw err });
   child.stderr.on('data', (data) => {
 	    console.log('err', String(data));
@@ -14,9 +16,9 @@ const invokeShell = (done, query, saveFilename, newFile = false) => {
   const actions = Actions(child);
   
   //Restore the default template if it's a new file
-  const filenameToRestore = newFile ? 'testsave' : saveFilename;
-  
-  subscribe(store, actions, filenameToRestore, query, done);
+  const filenameToRestore = newFile ? `${selectedGame}_default` : saveFilename;
+
+  subscribe(store, actions, filenameToRestore, saveFilename, query, done);
 
   returnIndex = 0;
 	child.stdout.on('data', (data) => {
@@ -62,14 +64,35 @@ exports.handler = (event, context, callback) => {
         } else if (body.originalRequest.source.includes('slack') && body.originalRequest.data && body.originalRequest.data.user) {
           username = body.originalRequest.data.user;
         }
-      
-        const saveFilename = `${body.originalRequest.source}_${username}`;
-        
-        downloadFileFromS3(saveFilename).then(() =>
-          invokeShell(done, query, saveFilename))
-          .catch(() => invokeShell(done, query, saveFilename, true));
-              break;
-        default:
-            done(new Error(`Unsupported method "${event.httpMethod}"`));
+
+        const CHANGE_GAME_STRING = 'change game to';
+        const AVAILABLE_GAMES = ['anchorhead','lostpig','photopia'];
+        if (query.includes(CHANGE_GAME_STRING)) {
+          const updatedGame = query.replace(CHANGE_GAME_STRING, '').trim().toLowerCase();
+          if(AVAILABLE_GAMES.includes(updatedGame)) {
+            updateSelectedGame(username, updatedGame).then(() => {
+              done(`Game changed to: ${updatedGame}`);
+            }).catch((err) => done(`Error updating selected game name in dynamo: ${err}`));
+          } else {
+            done(`Game not found. Please say 'change game to' one of the following: ${AVAILABLE_GAMES.join(',')}`);
+          }
+        } else {
+          getSelectedGame(username).then((selectedGame) => {
+            if (!selectedGame) {
+              updateSelectedGame(username, 'anchorhead').then(() => {
+                done(`Welcome ${username}! We'll start you playing Anchorhead, but you can change games at any time by saying: 'change game to' one of the following: ${AVAILABLE_GAMES.join(',')}`);
+              }).catch((err) => done(`Error updating selected game name in dynamo: ${err}`));
+            } else {
+              const saveFilename = `${body.originalRequest.source}_${username}_${selectedGame}`;
+              
+              downloadFileFromS3(saveFilename).then(() =>
+                invokeShell(done, query, saveFilename, false, selectedGame))
+                .catch(() => invokeShell(done, query, saveFilename, true, selectedGame));
+            }
+          }).catch((err) => done(`Error getting selected game name in dynamo: ${err}`));
+        }
+        break;
+      default:
+          done(new Error(`Unsupported method "${event.httpMethod}"`));
     }
 };

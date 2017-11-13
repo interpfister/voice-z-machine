@@ -3,13 +3,13 @@ const yesno = require('yesno');
 
 const body = {
 	result: {
-		resolvedQuery: 'south',
+		resolvedQuery: 'look',
 	},
   originalRequest: {
     source: 'google',
     data: {
       user: {
-        user_id: 'test-ryan',
+        user_id: 'test-user',
       }
     },
   },

@@ -4,6 +4,7 @@
   "main": "index.js",
   "author": "Ryan Pfister <interpfister@gmail.com>",
   "dependencies": {
+    "aws-sdk": "^2.149.0",
     "body-parser": "^1.18.2",
     "cross-spawn": "^5.1.0",
     "express": "^4.16.2",

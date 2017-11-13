@@ -17,7 +17,14 @@ const Actions = (child) => {
     return (commandText) => commandAndReturn(type)(`${commandText}\n`);
   }
   
+  this.enterRestoreWordCommand = () => commandWithNewlineAndReturn('RESTORE_COMMAND_ENTERED')('restore');
+
   this.enterRestoreCommand = () => commandAndReturn('RESTORE_COMMAND_ENTERED')('R');
+
+  this.enterNoInstructionsCommand = () => {
+    commandWithNewlineAndReturn('NO_INSTRUCTIONS_COMMAND_ENTERED')('N'); // ignoring this return type because we want an extra newline after
+    return commandWithNewlineAndReturn('NO_INSTRUCTIONS_COMMAND_ENTERED')('');
+  }
 
   this.enterRestoreFilename = commandWithNewlineAndReturn('RESTORE_FILENAME_ENTERED');
   
