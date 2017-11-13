@@ -66,12 +66,28 @@ exports.handler = (event, context, callback) => {
         }
 
         const CHANGE_GAME_STRING = 'change game to';
-        const AVAILABLE_GAMES = ['anchorhead','lostpig','photopia'];
+        const AVAILABLE_GAMES = [
+        {
+          name: 'anchorhead',
+          alternates: ['anchor head']
+        },
+        {
+          name: 'lostpig',
+          alternates: ['lost pig']
+        },
+        {
+          name: 'photopia',
+          alternates: ['photo pia']
+        }
+        ];
         if (query.includes(CHANGE_GAME_STRING)) {
-          const updatedGame = query.replace(CHANGE_GAME_STRING, '').trim().toLowerCase();
-          if(AVAILABLE_GAMES.includes(updatedGame)) {
-            updateSelectedGame(username, updatedGame).then(() => {
-              done(`Game changed to: ${updatedGame}`);
+          const updatedGameQuery = query.replace(CHANGE_GAME_STRING, '').trim().toLowerCase();
+          const updatedGame = AVAILABLE_GAMES.find((game) => {
+            return game.alternates.some((alternate) => alternate.includes(updatedGameQuery)) || game.name.includes(updatedGameQuery);
+          });
+          if(updatedGame) {
+            updateSelectedGame(username, updatedGame.name).then(() => {
+              done(`Game changed to: ${updatedGame.name}`);
             }).catch((err) => done(`Error updating selected game name in dynamo: ${err}`));
           } else {
             done(`Game not found. Please say 'change game to' one of the following: ${AVAILABLE_GAMES.join(',')}`);
