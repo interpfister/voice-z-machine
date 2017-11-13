@@ -70,7 +70,9 @@ const getGameStates = (selectedGame) => {
     case 'photopia':
       return Object.assign(regularFlow, {
         INIT: textMatchReducer('instructions?', 'READY_FOR_NO_INSTRUCTIONS_COMMAND'),
-        READY_FOR_NO_INSTRUCTIONS_COMMAND: typeMatchReducer('NO_INSTRUCTIONS_COMMAND_ENTERED', 'WAITING_FOR_CARROT'),
+        READY_FOR_NO_INSTRUCTIONS_COMMAND: typeMatchReducer('NO_INSTRUCTIONS_COMMAND_ENTERED', 'WAITING_FOR_NEXT_LINE'),
+        WAITING_FOR_NEXT_LINE: textMatchReducer('', 'READY_FOR_BLANK_COMMAND'),
+        READY_FOR_BLANK_COMMAND: typeMatchReducer('BLANK_COMMAND_ENTERED', 'WAITING_FOR_CARROT'),
         WAITING_FOR_CARROT: textMatchReducer('>', 'READY_FOR_RESTORE_WORD_COMMAND'),
         READY_FOR_RESTORE_WORD_COMMAND: typeMatchReducer('RESTORE_COMMAND_ENTERED', 'WAITING_FOR_RESTORE_PROMPT'),
       });

@@ -6,6 +6,9 @@ const subscribe = (store, actions, restoreFilename, saveFilename, query, done) =
       case 'READY_FOR_NO_INSTRUCTIONS_COMMAND':
         store.dispatch(actions.enterNoInstructionsCommand());
         break;
+      case 'READY_FOR_BLANK_COMMAND':
+        store.dispatch(actions.enterBlankCommand());
+        break;
       case 'READY_FOR_RESTORE_COMMAND':
         store.dispatch(actions.enterRestoreCommand());
         break;

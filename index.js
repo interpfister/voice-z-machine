@@ -88,7 +88,7 @@ exports.handler = (event, context, callback) => {
           });
           if(updatedGame) {
             updateSelectedGame(username, updatedGame.name).then(() => {
-              done(`Game changed to: ${updatedGame.name}`);
+              done(`Game changed to: ${updatedGame.name}. Say a command like 'look' or 'west' to get started.`);
             }).catch((err) => done(`Error updating selected game name in dynamo: ${err}`));
           } else {
             done(`Game not found. Please say 'change game to' one of the following: ${gameNames}`);
