@@ -80,7 +80,7 @@ exports.handler = (event, context, callback) => {
           getSelectedGame(username).then((selectedGame) => {
             if (!selectedGame) {
               updateSelectedGame(username, 'anchorhead').then(() => {
-                done(`Welcome ${username}! We'll start you playing Anchorhead, but you can change games at any time by saying: 'change game to' one of the following: ${AVAILABLE_GAMES.join(',')}`);
+                done(`Welcome! We'll start you playing Anchorhead, but you can change games at any time by saying: 'change game to' one of the following: ${AVAILABLE_GAMES.join(',')}`);
               }).catch((err) => done(`Error updating selected game name in dynamo: ${err}`));
             } else {
               const saveFilename = `${body.originalRequest.source}_${username}_${selectedGame}`;
