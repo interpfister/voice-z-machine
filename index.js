@@ -80,6 +80,7 @@ exports.handler = (event, context, callback) => {
           alternates: ['photo pia']
         }
         ];
+        const gameNames = AVAILABLE_GAMES.map((game) => game.name).join(', ');
         if (query.includes(CHANGE_GAME_STRING)) {
           const updatedGameQuery = query.replace(CHANGE_GAME_STRING, '').trim().toLowerCase();
           const updatedGame = AVAILABLE_GAMES.find((game) => {
@@ -90,13 +91,13 @@ exports.handler = (event, context, callback) => {
               done(`Game changed to: ${updatedGame.name}`);
             }).catch((err) => done(`Error updating selected game name in dynamo: ${err}`));
           } else {
-            done(`Game not found. Please say 'change game to' one of the following: ${AVAILABLE_GAMES.join(',')}`);
+            done(`Game not found. Please say 'change game to' one of the following: ${gameNames}`);
           }
         } else {
           getSelectedGame(username).then((selectedGame) => {
             if (!selectedGame) {
               updateSelectedGame(username, 'anchorhead').then(() => {
-                done(`We'll start you playing Anchorhead, but you can change games at any time by saying: 'change game to' one of the following: ${AVAILABLE_GAMES.join(',')}`);
+                done(`We'll start you playing Anchorhead, but you can change games at any time by saying: 'change game to' one of the following: ${gameNames}`);
               }).catch((err) => done(`Error updating selected game name in dynamo: ${err}`));
             } else if (query.includes('start')) {
               // This is if the user said start even though they already have a game selected

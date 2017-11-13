@@ -3,7 +3,7 @@ const yesno = require('yesno');
 
 const body = {
 	result: {
-		resolvedQuery: 'look',
+		resolvedQuery: 'change game to bob',
 	},
   originalRequest: {
     source: 'google',
