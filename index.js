@@ -81,7 +81,7 @@ exports.handler = (event, context, callback) => {
         }
         ];
         const gameNames = AVAILABLE_GAMES.map((game) => game.name).join(', ');
-        if (CHANGE_GAME_STRINGS.some((changeString) => query.includes(changeString))) {
+        if (CHANGE_GAME_STRINGS.some((changeString) => query.toLowerCase().includes(changeString))) {
           let stringWithChangeGamePartRemoved = query;
           CHANGE_GAME_STRINGS.forEach((stringToRemove) => {
             stringWithChangeGamePartRemoved = query.replace(stringToRemove, '');
