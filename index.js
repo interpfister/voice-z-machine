@@ -65,7 +65,7 @@ exports.handler = (event, context, callback) => {
           username = body.originalRequest.data.user;
         }
 
-        const CHANGE_GAME_STRING = 'change game to';
+        const CHANGE_GAME_STRINGS = ['change game to','change game 2'];
         const AVAILABLE_GAMES = [
         {
           name: 'anchorhead',
@@ -81,8 +81,12 @@ exports.handler = (event, context, callback) => {
         }
         ];
         const gameNames = AVAILABLE_GAMES.map((game) => game.name).join(', ');
-        if (query.includes(CHANGE_GAME_STRING)) {
-          const updatedGameQuery = query.replace(CHANGE_GAME_STRING, '').trim().toLowerCase();
+        if (CHANGE_GAME_STRINGS.some((changeString) => query.includes(changeString))) {
+          let stringWithChangeGamePartRemoved = query;
+          CHANGE_GAME_STRINGS.forEach((stringToRemove) => {
+            stringWithChangeGamePartRemoved = query.replace(stringToRemove, '');
+          })
+          const updatedGameQuery = stringWithChangeGamePartRemoved.trim().toLowerCase();
           const updatedGame = AVAILABLE_GAMES.find((game) => {
             return game.alternates.some((alternate) => alternate.includes(updatedGameQuery)) || game.name.includes(updatedGameQuery);
           });
