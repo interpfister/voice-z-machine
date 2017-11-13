@@ -70,14 +70,17 @@ const getGameStates = (selectedGame) => {
         READY_FOR_RESTORE_WORD_COMMAND: typeMatchReducer('RESTORE_COMMAND_ENTERED', 'WAITING_FOR_RESTORE_PROMPT'),
       });
     case 'photopia':
+      const sharedReducer = reduceReducers(
+        textMatchReducer('', 'READY_FOR_BLANK_COMMAND'),
+        typeMatchReducer('BLANK_COMMAND_ENTERED', 'WAITING_FOR_NEXT_LINE'),
+        textMatchReducer('>', 'READY_FOR_RESTORE_WORD_COMMAND')
+      );
+
       return Object.assign(regularFlow, {
         INIT: textMatchReducer('instructions?', 'READY_FOR_NO_INSTRUCTIONS_COMMAND'),
         READY_FOR_NO_INSTRUCTIONS_COMMAND: typeMatchReducer('NO_INSTRUCTIONS_COMMAND_ENTERED', 'WAITING_FOR_NEXT_LINE'),
-        WAITING_FOR_NEXT_LINE: reduceReducers(
-          textMatchReducer('', 'READY_FOR_BLANK_COMMAND'),
-          typeMatchReducer('BLANK_COMMAND_ENTERED', 'WAITING_FOR_NEXT_LINE'),
-          textMatchReducer('>', 'READY_FOR_RESTORE_WORD_COMMAND')
-        ),
+        WAITING_FOR_NEXT_LINE: sharedReducer,
+        READY_FOR_BLANK_COMMAND: sharedReducer,
         READY_FOR_RESTORE_WORD_COMMAND: typeMatchReducer('RESTORE_COMMAND_ENTERED', 'WAITING_FOR_RESTORE_PROMPT'),
       });
   }
