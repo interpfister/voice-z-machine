@@ -22,13 +22,11 @@ const invokeShell = (done, query, saveFilename, newFile = false, selectedGame) =
 
   returnIndex = 0;
 	child.stdout.on('data', (data) => {
-    const text = String(data) && String(data).trim().replace(query, '');
+    const text = String(data).trim().replace(query, '');
     
-    if(text) {
-      console.log(`cmd response ${returnIndex}:`, text);
-      store.dispatch(actions.processText(text));
-      returnIndex = returnIndex + 1;
-    }
+    console.log(`cmd response ${returnIndex}:`, text);
+    store.dispatch(actions.processText(text));
+    returnIndex = returnIndex + 1;
 	});
 };
 
@@ -77,7 +75,7 @@ exports.handler = (event, context, callback) => {
         },
         {
           name: 'photopia',
-          alternates: ['photo pia']
+          alternates: ['photo pia','four topia']
         }
         ];
         const gameNames = AVAILABLE_GAMES.map((game) => game.name).join(', ');
