@@ -35,7 +35,7 @@ const mainCommandResponseReducer = (state = initialState, action) => {
   const updatedState =
     action.type === 'PROCESS_TEXT' && action.payload.text ?
       Object.assign(state, {
-        returnText: state.returnText.concat(action.payload.text),
+        returnText: state.returnText.concat(`${action.payload.text}:`),
       }) : state;  
   return textMatchReducer('>', 'READY_FOR_SAVE_COMMAND')(updatedState, action);
 }
