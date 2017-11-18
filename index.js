@@ -50,18 +50,15 @@ exports.handler = (event, context, callback) => {
           done('No query found', true);
           return;
         }
-        if(!body.originalRequest.source && !body.sessionId) {
-          done('No original request source or sessionId found', true);
-          return;
-        }
+        const source = (body.originalRequest && body.originalRequest.source) ? body.originalRequest.source : 'no-source';
       
         let username = 'default';
       
-        if(body.originalRequest.source.includes('google') && body.originalRequest.data && body.originalRequest.data.user && body.originalRequest.data.user.user_id) {
+        if(source.includes('google') && body.originalRequest.data && body.originalRequest.data.user && body.originalRequest.data.user.user_id) {
           username = body.originalRequest.data.user.user_id;
-        } else if (body.originalRequest.source.includes('slack') && body.originalRequest.data && body.originalRequest.data.user) {
+        } else if (source.includes('slack') && body.originalRequest.data && body.originalRequest.data.user) {
           username = body.originalRequest.data.user;
-        } else if (body.originalRequest.source.includes('facebook') && body.originalRequest.data && body.originalRequest.data.sender && body.originalRequest.data.sender.id) {
+        } else if (source.includes('facebook') && body.originalRequest.data && body.originalRequest.data.sender && body.originalRequest.data.sender.id) {
           username = body.originalRequest.data.sender.id;
         } else if (body.sessionId) {
           username = body.sessionId; // for web demo
@@ -111,7 +108,7 @@ exports.handler = (event, context, callback) => {
               // This is if the user said start even though they already have a game selected
               done(`You're playing ${selectedGame}. Say a command like 'look' or 'west' to get started.`);
             } else {
-              const saveFilename = `${body.originalRequest.source}_${username}_${selectedGame}`;
+              const saveFilename = `${source}_${username}_${selectedGame}`;
               
               downloadFileFromS3(saveFilename).then(() =>
                 invokeShell(done, query, saveFilename, false, selectedGame))
