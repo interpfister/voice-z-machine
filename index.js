@@ -60,6 +60,8 @@ exports.handler = (event, context, callback) => {
           username = body.originalRequest.data.user;
         } else if (source.includes('facebook') && body.originalRequest.data && body.originalRequest.data.sender && body.originalRequest.data.sender.id) {
           username = body.originalRequest.data.sender.id;
+        } else if (source.includes('twitter') && body.originalRequest.data && body.originalRequest.data.in_reply_to_user_id_str) {
+          username = body.originalRequest.data.in_reply_to_user_id_str;
         } else if (body.sessionId) {
           username = body.sessionId; // for web demo
         }
