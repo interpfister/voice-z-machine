@@ -50,8 +50,8 @@ exports.handler = (event, context, callback) => {
           done('No query found', true);
           return;
         }
-        if(!body.originalRequest.source) {
-          done('No original request source found', true);
+        if(!body.originalRequest.source && !body.sessionId) {
+          done('No original request source or sessionId found', true);
           return;
         }
       
@@ -61,6 +61,10 @@ exports.handler = (event, context, callback) => {
           username = body.originalRequest.data.user.user_id;
         } else if (body.originalRequest.source.includes('slack') && body.originalRequest.data && body.originalRequest.data.user) {
           username = body.originalRequest.data.user;
+        } else if (body.originalRequest.source.includes('facebook') && body.originalRequest.data && body.originalRequest.data.sender && body.originalRequest.data.sender.id) {
+          username = body.originalRequest.data.sender.id;
+        } else if (body.sessionId) {
+          username = body.sessionId; // for web demo
         }
 
         const CHANGE_GAME_STRINGS = ['change game to','change game 2'];
