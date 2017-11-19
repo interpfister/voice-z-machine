@@ -73,7 +73,10 @@ exports.handler = (event, context, callback) => {
           return;
         }
         const source = (body.originalRequest && body.originalRequest.source) ? body.originalRequest.source : 'no-source';
-        gaParams.campaignName = source;
+        gaParams.cs = source;
+        gaParams.cn = source;
+        gaParams.cm = source;
+        gaParams.dr = `https://${source}.com`;
 
         let username = 'default';
       
