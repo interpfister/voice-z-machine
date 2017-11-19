@@ -35,7 +35,7 @@ const invokeShell = (done, query, saveFilename, newFile = false, selectedGame) =
 exports.handler = (event, context, callback) => {
     debug('START: Received event:', JSON.stringify(event, null, 2));
 
-    let gaParams = {};
+    let gaParams = { documentPath: '/start' };
     const startTime = new Date();
 
     const done = (speech, err) => {
@@ -64,7 +64,8 @@ exports.handler = (event, context, callback) => {
           return;
         }
         const source = (body.originalRequest && body.originalRequest.source) ? body.originalRequest.source : 'no-source';
-      
+        gaParams.campaignName = source;
+
         let username = 'default';
       
         if(source.includes('google') && body.originalRequest.data && body.originalRequest.data.user && body.originalRequest.data.user.user_id) {
@@ -125,11 +126,8 @@ exports.handler = (event, context, callback) => {
             } else {
               const saveFilename = `${source}_${username}_${selectedGame}`;
 
-              gaParams = {
-                documentPath: `/${selectedGame}/${encodeURI(query)}`,
-                campaignName: source,
-                uid: `${source}-${username}`,
-              };
+              gaParams.uid = `${source}-${username}`;
+              gaParams.documentPath = `/${selectedGame}/${encodeURI(query)}`;
                     
               downloadFileFromS3(saveFilename).then(() =>
                 invokeShell(done, query, saveFilename, false, selectedGame))
