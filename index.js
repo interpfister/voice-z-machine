@@ -35,7 +35,7 @@ const invokeShell = (done, query, saveFilename, newFile = false, selectedGame) =
 exports.handler = (event, context, callback) => {
     debug('START: Received event:', JSON.stringify(event, null, 2));
 
-    let gaParams;
+    let gaParams = {};
     const startTime = new Date();
 
     const done = (speech, err) => {
