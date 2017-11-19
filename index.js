@@ -6,6 +6,7 @@ const downloadFileFromS3 = require('./s3-functions').downloadFileFromS3;
 const getSelectedGame = require('./dynamo-functions').getSelectedGame;
 const updateSelectedGame = require('./dynamo-functions').updateSelectedGame;
 const debug = require('debug')('index');
+const ua = require("universal-analytics");
 
 const invokeShell = (done, query, saveFilename, newFile = false, selectedGame) => {
   const store = makeStore(selectedGame);
@@ -34,13 +35,25 @@ const invokeShell = (done, query, saveFilename, newFile = false, selectedGame) =
 exports.handler = (event, context, callback) => {
     debug('START: Received event:', JSON.stringify(event, null, 2));
 
-    const done = (speech, err) => callback(null, {
+    let gaParams;
+    let visitor_uid;
+    const startTime = new Date();
+
+    const done = (speech, err) => {
+      gaParams.pageLoadTime = new Date() - startTime;
+      const visitor = ua(process.env.GA_TRACKING_ID);
+      visitor.pageview(gaParams, (gaErr) => {
+        gaErr && debug(`GA ERROR: ${gaErr}`);
+      });
+
+      callback(null, {
         statusCode: err ? '400' : '200',
         body: JSON.stringify({ speech }),
         headers: {
             'Content-Type': 'application/json',
         },
-    });
+      });
+    }
     
     const body = JSON.parse(event.body);
 
@@ -53,7 +66,7 @@ exports.handler = (event, context, callback) => {
         }
         const source = (body.originalRequest && body.originalRequest.source) ? body.originalRequest.source : 'no-source';
       
-        let username = 'default';
+        username = 'default';
       
         if(source.includes('google') && body.originalRequest.data && body.originalRequest.data.user && body.originalRequest.data.user.user_id) {
           username = body.originalRequest.data.user.user_id;
@@ -112,7 +125,13 @@ exports.handler = (event, context, callback) => {
               done(`You're playing ${selectedGame}. Say a command like 'look' or 'west' to get started.`);
             } else {
               const saveFilename = `${source}_${username}_${selectedGame}`;
-              
+
+              gaParams = {
+                documentPath: `/${selectedGame}/${encodeURI(query)}`,
+                campaignName: source,
+                uid: `${source}-${username}`,
+              };
+                    
               downloadFileFromS3(saveFilename).then(() =>
                 invokeShell(done, query, saveFilename, false, selectedGame))
                 .catch(() => invokeShell(done, query, saveFilename, true, selectedGame));

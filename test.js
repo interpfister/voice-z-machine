@@ -8,7 +8,7 @@ if(!debug.enabled) {
 
 const body = {
 	result: {
-		resolvedQuery: 'look',
+		resolvedQuery: 'examine sky',
 	},
   originalRequest: {
     source: 'google',

@@ -2,13 +2,7 @@ const express = require('express')
 const app = express()
 const handler = require('./index').handler;
 const bodyParser = require('body-parser');
-const ua = require("universal-analytics");
-const analytics = ua.middleware(proces.env.GA_TRACKING_ID || '', {cookieName: '_ga'});
 const debug = require('debug')('server');
-
-//Add to express before your routes 
-app.use(analytics);
-
 
 const jsonParser = bodyParser.json();
 
