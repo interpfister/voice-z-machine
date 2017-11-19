@@ -42,7 +42,7 @@ exports.handler = (event, context, callback) => {
     const failsafeTimeout = setTimeout(() => {
       errorDebug('Response timed out for query', event);
       done(`Sorry - I couldn't respond in time. Please try your command again.`, true);
-    }, 5000);
+    }, process.env.FAILSAFE_TIMEOUT || 5000);
 
     const done = (speech, err) => {
       typeof failsafeTimeout === 'function' && failsafeTimeout(); //deactivate timeout
