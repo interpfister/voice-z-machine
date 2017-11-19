@@ -1,5 +1,10 @@
 const index = require('./index');
 const yesno = require('yesno');
+const debug = require('debug')('test');
+
+if(!debug.enabled) {
+  console.warn('debug not enabled - no console output will be displayed');
+}
 
 const body = {
 	result: {
@@ -20,7 +25,7 @@ const event = {
 }
 
 const callback = (something, result) => {
-  console.log('RESULT:', result);
+  debug('RESULT:', result);
 
   if(process.argv.length > 2 && process.argv[2] === '--pause') {
     yesno.ask('Press enter to exit, or view the state actions at: http://remotedev.io/local/', true, () => {

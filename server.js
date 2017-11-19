@@ -4,6 +4,7 @@ const handler = require('./index').handler;
 const bodyParser = require('body-parser');
 const ua = require("universal-analytics");
 const analytics = ua.middleware(proces.env.GA_TRACKING_ID || '', {cookieName: '_ga'});
+const debug = require('debug')('server');
 
 //Add to express before your routes 
 app.use(analytics);
@@ -23,13 +24,13 @@ app.post('/', jsonParser, (req, res) => {
   const callback = (something, result) => {
     res.send(result.body);
   }
-  console.log(`calling handler with: ${body}`);
+  debug(`calling handler with: ${body}`);
   handler(event, {}, callback);
 });
 
 process.on('uncaughtException', function(err) {
-  console.log('Caught exception: ' + err);
+  debug('Caught exception: ' + err);
 });
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+app.listen(port, () => debug(`Example app listening on port ${port}!`));

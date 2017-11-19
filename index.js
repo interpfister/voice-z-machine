@@ -5,13 +5,14 @@ const subscribe = require('./subscriber');
 const downloadFileFromS3 = require('./s3-functions').downloadFileFromS3;
 const getSelectedGame = require('./dynamo-functions').getSelectedGame;
 const updateSelectedGame = require('./dynamo-functions').updateSelectedGame;
+const debug = require('debug')('index');
 
 const invokeShell = (done, query, saveFilename, newFile = false, selectedGame) => {
   const store = makeStore(selectedGame);
   const child = spawn('npm', ['run',`start-${selectedGame}`]);
 	child.on('error', function( err ){ throw err });
   child.stderr.on('data', (data) => {
-	    console.log('err', String(data));
+	    debug('err', String(data));
   });
   const actions = Actions(child);
   
@@ -24,14 +25,14 @@ const invokeShell = (done, query, saveFilename, newFile = false, selectedGame) =
 	child.stdout.on('data', (data) => {
     const text = String(data).trim().replace(query, '');
     
-    console.log(`cmd response ${returnIndex}:`, text);
+    debug(`cmd response ${returnIndex}:`, text);
     store.dispatch(actions.processText(text));
     returnIndex = returnIndex + 1;
 	});
 };
 
 exports.handler = (event, context, callback) => {
-    console.log('START: Received event:', JSON.stringify(event, null, 2));
+    debug('START: Received event:', JSON.stringify(event, null, 2));
 
     const done = (speech, err) => callback(null, {
         statusCode: err ? '400' : '200',
@@ -86,10 +87,10 @@ exports.handler = (event, context, callback) => {
           let stringWithChangeGamePartRemoved = query.toLowerCase();
           CHANGE_GAME_STRINGS.forEach((stringToRemove) => {
             stringWithChangeGamePartRemoved = stringWithChangeGamePartRemoved.replace(stringToRemove, '');
-            console.log('TEST', stringToRemove, stringWithChangeGamePartRemoved);
+            debug('TEST', stringToRemove, stringWithChangeGamePartRemoved);
           })
           const updatedGameQuery = stringWithChangeGamePartRemoved.trim().toLowerCase();
-          console.log('updatedGameQuery', updatedGameQuery);
+          debug('updatedGameQuery', updatedGameQuery);
           const updatedGame = AVAILABLE_GAMES.find((game) => {
             return game.alternates.some((alternate) => alternate.includes(updatedGameQuery)) || game.name.includes(updatedGameQuery);
           });

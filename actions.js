@@ -1,11 +1,12 @@
 const uploadFileToS3 = require('./s3-functions').uploadFileToS3;
+const debug = require('debug')('actions');
 
 // THESE ARE THE ACTUAL ACTIONS TO TAKE - TRIGGERED BY STATE CHANGES
 
 const Actions = (child) => {
   const commandAndReturn = (type) => {
     return (commandText) => {
-      console.log('writing to command line:', commandText);
+      debug('writing to command line:', commandText);
       child.stdin.write(commandText);
       return {
         type,

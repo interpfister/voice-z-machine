@@ -1,4 +1,5 @@
 const s3 = require('s3');
+const debug = require('debug')('s3');
 
 const client = s3.createClient({
   s3Options: {
@@ -19,14 +20,14 @@ const createParams = (filename) => {
 const handleS3EventEmitter = (emitter) => {
   return new Promise((resolve, reject) => {
     emitter.on('error', function(err) {
-      // console.error("error:", err.stack);
+      debug("error:", err.stack);
       reject(err.stack);
     });
     emitter.on('progress', function() {
       // console.log("progress", emitter.progressTotal);
     });
     emitter.on('end', function() {
-      // console.log("done download/upload");
+      debug("done download/upload");
       resolve('done download/upload');
     });
   });

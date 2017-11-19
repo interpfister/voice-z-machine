@@ -1,6 +1,6 @@
 const reduceReducers = require('reduce-reducers');
-
 const createMachine = require('redux-machine').createMachine;
+const debug = require('debug')('reducers');
 
 const initialState = {
   status: 'INIT',
@@ -8,14 +8,14 @@ const initialState = {
 }
 
 const logState = (state, action) => {
-  process.env.REDUX_LOGGING && console.log(`ACTION: ${JSON.stringify(action)} -- STATE: ${JSON.stringify(state)}`);
+  debug(`ACTION: ${JSON.stringify(action)} -- STATE: ${JSON.stringify(state)}`);
 }
 const textMatchReducer = (textToMatch, newStatus) => {
   return (state = initialState, action) => {
     logState(state, action);
     if(action.type === 'PROCESS_TEXT' && action.payload.text.toLowerCase().includes(textToMatch.toLowerCase())) {
       const updatedState = Object.assign(state, { status: newStatus });
-      process.env.REDUX_LOGGING && console.log('Updated state', updatedState);
+      debug('Updated state', updatedState);
     }
     return state;
   }
@@ -85,7 +85,7 @@ const getGameStates = (selectedGame) => {
 }
 
 const rootReducer = (selectedGame) => {
-  console.log('SELECTED GAME', selectedGame);
+  debug('SELECTED GAME', selectedGame);
   const gameStates = getGameStates(selectedGame);
   return createMachine(gameStates);
 }

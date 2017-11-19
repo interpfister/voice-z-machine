@@ -1,4 +1,5 @@
 const AWS = require('aws-sdk');
+const debug = require('debug')('dynamo');
 
 const dynamoDb = new AWS.DynamoDB({
   region: 'us-east-1',
@@ -38,7 +39,7 @@ const updateSelectedGame = (userId, selectedGameName) => {
     },
     TableName: TABLE_NAME,
   };
-  console.log(params);
+  debug(params);
   return new Promise((resolve, reject) => {
     dynamoDb.putItem(params, (err, data) => {
       err ? reject(err) : resolve(data);

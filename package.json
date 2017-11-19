@@ -6,7 +6,9 @@
   "dependencies": {
     "aws-sdk": "^2.149.0",
     "body-parser": "^1.18.2",
+    "cross-env": "^5.1.1",
     "cross-spawn": "^5.1.0",
+    "debug": "^3.1.0",
     "express": "^4.16.2",
     "ifvms": "^1.1.2",
     "reduce-reducers": "^0.1.2",
@@ -23,7 +25,7 @@
     "start-photopia": "zvm games/photopia.z5",
     "start-lostpig": "zvm games/lostpig.z8",
     "start": "node server.js",
-    "test": "node test.js",
+    "test": "cross-env DEBUG=* node test.js",
     "test-pause": "node test.js --pause"
   }
 }
