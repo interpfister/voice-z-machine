@@ -36,7 +36,6 @@ exports.handler = (event, context, callback) => {
     debug('START: Received event:', JSON.stringify(event, null, 2));
 
     let gaParams;
-    let visitor_uid;
     const startTime = new Date();
 
     const done = (speech, err) => {
@@ -66,7 +65,7 @@ exports.handler = (event, context, callback) => {
         }
         const source = (body.originalRequest && body.originalRequest.source) ? body.originalRequest.source : 'no-source';
       
-        username = 'default';
+        let username = 'default';
       
         if(source.includes('google') && body.originalRequest.data && body.originalRequest.data.user && body.originalRequest.data.user.user_id) {
           username = body.originalRequest.data.user.user_id;
