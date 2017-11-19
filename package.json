@@ -15,6 +15,7 @@
     "redux-thunk": "^2.2.0",
     "remote-redux-devtools": "^0.5.12",
     "s3": "^4.4.0",
+    "universal-analytics": "^0.4.15",
     "yesno": "^0.0.1"
   },
   "scripts": {
