@@ -15,8 +15,14 @@ app.post('/', jsonParser, (req, res) => {
     body: JSON.stringify(body),
   }
   
+  let responseSent = false;
   const callback = (something, result) => {
-    res.send(result.body);
+    if(!responseSent) {
+      responseSent = true;
+      res.send(result.body);
+    } else {
+      debug('Response callback unexpectedly called a second time.');
+    }
   }
   debug(`calling handler with: ${body}`);
   handler(event, {}, callback);
