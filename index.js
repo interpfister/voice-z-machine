@@ -6,6 +6,7 @@ const downloadFileFromS3 = require('./s3-functions').downloadFileFromS3;
 const getSelectedGame = require('./dynamo-functions').getSelectedGame;
 const updateSelectedGame = require('./dynamo-functions').updateSelectedGame;
 const debug = require('debug')('index');
+const errorDebug = require('debug')('error');
 const ua = require("universal-analytics");
 
 const invokeShell = (done, query, saveFilename, newFile = false, selectedGame) => {
@@ -38,12 +39,20 @@ exports.handler = (event, context, callback) => {
     let gaParams = { documentPath: '/start' };
     const startTime = new Date();
 
+    const failsafeTimeout = setTimeout(() => {
+      errorDebug('Response timed out for query', event);
+      done(`Sorry - I couldn't respond in time. Please try your command again.`, true);
+    }, 5000);
+
     const done = (speech, err) => {
+      typeof failsafeTimeout === 'function' && failsafeTimeout(); //deactivate timeout
+
       gaParams.pageLoadTime = new Date() - startTime;
       const visitor = ua(process.env.GA_TRACKING_ID);
-      visitor.pageview(gaParams, (gaErr) => {
-        gaErr && debug(`GA ERROR: ${gaErr}`);
-      });
+
+      const gaCallback = (gaErr) => gaErr && debug(`GA ERROR: ${gaErr}`);
+      err ? visitor.exception(gaParams, gaCallback) :
+        visitor.pageview(gaParams, gaCallback);
 
       callback(null, {
         statusCode: err ? '400' : '200',
