@@ -48,7 +48,7 @@ exports.handler = (event, context, callback) => {
       typeof failsafeTimeout === 'function' && failsafeTimeout(); //deactivate timeout
 
       gaParams.pageLoadTime = new Date() - startTime;
-      const visitor = ua(process.env.GA_TRACKING_ID);
+      const visitor = ua(process.env.GA_TRACKING_ID, gaParams.uid, {strictCidFormat: false});
 
       const gaCallback = (gaErr) => gaErr && debug(`GA ERROR: ${gaErr}`);
       err ? visitor.exception(gaParams, gaCallback) :
