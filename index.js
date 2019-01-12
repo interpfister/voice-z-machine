@@ -1,6 +1,3 @@
-const makeStore = require("./store");
-const Actions = require("./actions");
-const subscribe = require("./subscriber");
 const downloadFileFromS3 = require("./s3-functions").downloadFileFromS3;
 const getSelectedGame = require("./dynamo-functions").getSelectedGame;
 const updateSelectedGame = require("./dynamo-functions").updateSelectedGame;

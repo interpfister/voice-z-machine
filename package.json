@@ -29,6 +29,7 @@
     }
   },
   "scripts": {
+    "deploy": "zip -r deploy.zip * && aws lambda update-function-code --function-name voice-z-machine-interpreter --zip-file fileb://deploy.zip",
     "format": "prettier --write \"./**/*.{js,jsx,json}\"",
     "start-anchorhead": "zvm games/anchor.z8",
     "start-photopia": "zvm games/photopia.z5",
