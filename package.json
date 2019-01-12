@@ -12,13 +12,7 @@
     "express": "^4.16.2",
     "frotz-interfacer": "^1.4.1",
     "husky": "^1.3.1",
-    "ifvms": "^1.1.2",
     "prettier": "^1.15.3",
-    "reduce-reducers": "^0.1.2",
-    "redux": "^3.7.2",
-    "redux-machine": "^1.2.0",
-    "redux-thunk": "^2.2.0",
-    "remote-redux-devtools": "^0.5.12",
     "s3": "^4.4.0",
     "universal-analytics": "^0.4.15",
     "yesno": "^0.0.1"
@@ -31,9 +25,6 @@
   "scripts": {
     "deploy": "zip -r deploy.zip * && aws lambda update-function-code --function-name voice-z-machine-interpreter --zip-file fileb://deploy.zip",
     "format": "prettier --write \"./**/*.{js,jsx,json}\"",
-    "start-anchorhead": "zvm games/anchor.z8",
-    "start-photopia": "zvm games/photopia.z5",
-    "start-lostpig": "zvm games/lostpig.z8",
     "start": "node server.js",
     "test": "cross-env DEBUG=* node test.js",
     "test-pause": "node test.js --pause"
