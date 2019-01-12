@@ -1,5 +1,4 @@
 const makeStore = require('./store');
-const spawn = require('cross-spawn');
 const Actions = require('./actions');
 const subscribe = require('./subscriber');
 const downloadFileFromS3 = require('./s3-functions').downloadFileFromS3;
@@ -8,29 +7,13 @@ const updateSelectedGame = require('./dynamo-functions').updateSelectedGame;
 const debug = require('debug')('index');
 const errorDebug = require('debug')('error');
 const ua = require("universal-analytics");
+const interpreter = require('./interpreter');
 
-const invokeShell = (done, query, saveFilename, newFile = false, selectedGame) => {
-  const store = makeStore(selectedGame);
-  const child = spawn('npm', ['run',`start-${selectedGame}`]);
-	child.on('error', function( err ){ throw err });
-  child.stderr.on('data', (data) => {
-	    debug('err', String(data));
-  });
-  const actions = Actions(child);
-  
+const invokeShell = (done, query, saveFilename, newFile = false, selectedGame) => { 
   //Restore the default template if it's a new file
   const filenameToRestore = newFile ? `${selectedGame}_default` : saveFilename;
 
-  subscribe(store, actions, filenameToRestore, saveFilename, query, done);
-
-  returnIndex = 0;
-	child.stdout.on('data', (data) => {
-    const text = String(data).trim().replace(query, '');
-    
-    debug(`cmd response ${returnIndex}:`, text);
-    store.dispatch(actions.processText(text));
-    returnIndex = returnIndex + 1;
-	});
+  interpreter(selectedGame, filenameToRestore, saveFilename, query, done);
 };
 
 exports.handler = (event, context, callback) => {
@@ -112,7 +95,6 @@ exports.handler = (event, context, callback) => {
           let stringWithChangeGamePartRemoved = query.toLowerCase();
           CHANGE_GAME_STRINGS.forEach((stringToRemove) => {
             stringWithChangeGamePartRemoved = stringWithChangeGamePartRemoved.replace(stringToRemove, '');
-            debug('TEST', stringToRemove, stringWithChangeGamePartRemoved);
           })
           const updatedGameQuery = stringWithChangeGamePartRemoved.trim().toLowerCase();
           debug('updatedGameQuery', updatedGameQuery);

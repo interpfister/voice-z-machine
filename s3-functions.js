@@ -9,7 +9,7 @@ const client = s3.createClient({
 
 const createParams = (filename) => {
   return {
-    localFile: filename,
+    localFile: `/tmp/${filename}`,
     s3Params: {
       Bucket: "voice-z-machine",
       Key: filename,

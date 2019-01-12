@@ -8,7 +8,7 @@ if(!debug.enabled) {
 
 const body = {
 	result: {
-		resolvedQuery: 'examine sky',
+		resolvedQuery: process.argv.length > 2 ? process.argv.slice(2).join(' ') : 'examine sky',
 	},
   originalRequest: {
     source: 'google',
