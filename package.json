@@ -24,10 +24,14 @@
     "universal-analytics": "^0.4.15",
     "yesno": "^0.0.1"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged",
+      "post-commit": "git update-index -g"
+    }
+  },
   "scripts": {
     "format": "prettier --write \"./**/*.{js,jsx,json}\"",
-    "precommit": "pretty-quick --staged",
-    "postcommit": "git update-index -g",
     "start-anchorhead": "zvm games/anchor.z8",
     "start-photopia": "zvm games/photopia.z5",
     "start-lostpig": "zvm games/lostpig.z8",
