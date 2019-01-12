@@ -79,9 +79,9 @@ exports.handler = (event, context, callback) => {
         source.includes("google") &&
         body.originalRequest.data &&
         body.originalRequest.data.user &&
-        body.originalRequest.data.user.user_id
+        body.originalRequest.data.user.userId
       ) {
-        username = body.originalRequest.data.user.user_id;
+        username = body.originalRequest.data.user.userId;
       } else if (
         source.includes("slack") &&
         body.originalRequest.data &&
