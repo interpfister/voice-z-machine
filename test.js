@@ -25,7 +25,7 @@ const event = {
   body: JSON.stringify(body)
 };
 
-const callback = (something, result) => {
+const callback = result => {
   debug("RESULT:", result);
 
   if (process.argv.length > 2 && process.argv[2] === "--pause") {
@@ -41,4 +41,4 @@ const callback = (something, result) => {
   }
 };
 
-index.handler(event, {}, callback);
+index.handler(event).then(callback);

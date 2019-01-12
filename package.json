@@ -4,39 +4,33 @@
   "main": "index.js",
   "author": "Ryan Pfister <interpfister@gmail.com>",
   "dependencies": {
-    "aws-sdk": "^2.149.0",
+    "aws-sdk": "^2.387.0",
     "body-parser": "^1.18.2",
     "cross-env": "^5.1.1",
-    "cross-spawn": "^5.1.0",
     "debug": "^3.1.0",
     "express": "^4.16.2",
     "frotz-interfacer": "^1.4.1",
     "husky": "^1.3.1",
-    "ifvms": "^1.1.2",
     "prettier": "^1.15.3",
-    "pretty-quick": "^1.8.0",
-    "reduce-reducers": "^0.1.2",
-    "redux": "^3.7.2",
-    "redux-machine": "^1.2.0",
-    "redux-thunk": "^2.2.0",
-    "remote-redux-devtools": "^0.5.12",
     "s3": "^4.4.0",
     "universal-analytics": "^0.4.15",
     "yesno": "^0.0.1"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "pretty-quick --staged",
-      "post-commit": "git update-index -g"
+      "pre-commit": "npm run format"
     }
   },
   "scripts": {
     "format": "prettier --write \"./**/*.{js,jsx,json}\"",
-    "start-anchorhead": "zvm games/anchor.z8",
-    "start-photopia": "zvm games/photopia.z5",
-    "start-lostpig": "zvm games/lostpig.z8",
+    "deploy": "zip -r deploy.zip * && aws lambda update-function-code --function-name voice-z-machine-interpreter --zip-file fileb://deploy.zip",
     "start": "node server.js",
     "test": "cross-env DEBUG=* node test.js",
-    "test-pause": "node test.js --pause"
+    "test-pause": "node test.js --pause",
+    "validate-template": "aws cloudformation validate-template --template-body file://cloudformation.yaml",
+    "delete-stack": "aws cloudformation delete-stack --stack-name voice-z-machine && aws cloudformation wait stack-delete-complete --stack-name voice-z-machine",
+    "create-stack": "aws cloudformation create-stack --stack-name voice-z-machine --template-body file://cloudformation.yaml --capabilities CAPABILITY_IAM && aws cloudformation wait stack-create-complete --stack-name voice-z-machine",
+    "refresh-stack": "yarn delete-stack && yarn stack-delete-complete && yarn create-stack && yarn stack-create-complete",
+    "update-stack": "aws cloudformation update-stack --stack-name voice-z-machine --template-body file://cloudformation.yaml --capabilities CAPABILITY_IAM && aws cloudformation wait stack-update-complete --stack-name voice-z-machine"
   }
 }

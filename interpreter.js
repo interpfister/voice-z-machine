@@ -14,8 +14,7 @@ module.exports = async (
   selectedGame,
   filenameToRestore,
   saveFilename,
-  query,
-  done
+  query
 ) => {
   const savePath = `/tmp/${saveFilename}.glksave`;
   if (!fs.existsSync(savePath)) {
@@ -35,17 +34,21 @@ module.exports = async (
     outputFilter: frotz.filter
   });
 
-  interfacer.iteration(query, async (error, output) => {
-    if (error && error.error) {
-      done(error.error);
-    } else {
-      await uploadFileToS3(saveFilename);
-      done(
-        output.pretty
-          .slice(2)
-          .join("")
-          .trim()
-      );
-    }
+  const promise = new Promise((resolve, reject) => {
+    interfacer.iteration(query, (error, output) => {
+      if (error && error.error) {
+        reject(error.error);
+      } else {
+        //await uploadFileToS3(saveFilename);
+        resolve(
+          output.pretty
+            .slice(2)
+            .join("")
+            .trim()
+        );
+      }
+    });
   });
+
+  return promise;
 };

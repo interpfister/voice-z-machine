@@ -1,0 +1,234 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Voice-Z-Machine API Stack"
+
+Parameters:
+  SaveGameBucketName:
+    Type: "String"
+    AllowedPattern: "^[a-z0-9-]+$"
+    Default: "voice-z-machine"
+
+Resources:
+  CloudWatchRole: 
+    Type: AWS::IAM::Role
+    DependsOn:
+      - "apiGateway"
+    Properties: 
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - Effect: Allow
+            Principal: 
+              Service: 
+                - "apigateway.amazonaws.com"
+            Action: "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns: 
+        - "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+  ApiGatewayAccount: 
+    Type: AWS::ApiGateway::Account
+    Properties: 
+      CloudWatchRoleArn: 
+        "Fn::GetAtt": 
+          - CloudWatchRole
+          - Arn
+  apiGateway:
+    Type: "AWS::ApiGateway::RestApi"
+    Properties:
+      Name: "voice-z-machine-api"
+      Description: "Voice-Z-Machine API"
+
+  apiGatewayQueryResource:
+    Type: "AWS::ApiGateway::Resource"
+    Properties:
+      ParentId: !GetAtt apiGateway.RootResourceId
+      PathPart: query
+      RestApiId: !Ref apiGateway
+
+  apiGatewayQueryMethod:
+    Type: "AWS::ApiGateway::Method"
+    DependsOn:
+      - "apiGatewayQueryResource"
+    Properties:
+      AuthorizationType: "NONE"
+      HttpMethod: "POST"
+      Integration:
+        IntegrationHttpMethod: "POST"
+        Type: "AWS_PROXY"
+        Uri: !Sub
+          - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations"
+          - lambdaArn: !GetAtt "interpreterLambdaFunction.Arn"
+      ResourceId: !Ref apiGatewayQueryResource
+      RestApiId: !Ref apiGateway
+
+  InterpreterLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt 
+        - interpreterLambdaFunction
+        - Arn
+      Action: 'lambda:InvokeFunction'
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${apiGateway}/*/POST/*"
+ 
+  apiGatewayDeployment:
+    Type: "AWS::ApiGateway::Deployment"
+    DependsOn:
+      - apiGatewayQueryMethod
+    Properties:
+      RestApiId: !Ref "apiGateway"
+      StageName: "prod"
+      # Couldn't get this to work - manually turn on logging if needed
+      # StageDescription:
+      #   MethodSettings:
+      #     - MetricsEnabled: true
+      #     - LoggingLevel: ERROR
+      #     - HttpMethod: "*"
+      #     - ResourcePath: "/*"
+
+  interpreterLambdaFunction:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Description: "Receives call POST from Google Home and other platforms and returns response from z-machine game"
+      FunctionName: "voice-z-machine-interpreter"
+      Handler: "index.handler"
+      MemorySize: 128
+      Role: !GetAtt "lambdaIAMRole.Arn"
+      Runtime: "nodejs8.10"
+      Timeout: 30
+      Code:
+        ZipFile: |
+          (event,context) => {
+            return {
+              'body': 'Hello there {0}'.format(event['requestContext']['identity']['sourceIp']),
+              'headers': {
+                'Content-Type': 'text/plain'
+              },
+              'statusCode': 200
+            }
+          }
+
+  # Already exists so not creating
+  #SaveGameBucket:
+  #  Type: AWS::S3::Bucket
+  #  Properties:
+  #    BucketName: !Ref 'SaveGameBucketName'
+  #    AccessControl: PublicRead
+  #    WebsiteConfiguration:
+  #      IndexDocument: index.html
+  #      ErrorDocument: 404.html
+  #    LifecycleConfiguration:
+  #      Rules:
+  #        - ExpirationInDays: 1
+  #          Status: Enabled
+
+  # Dynamo DB table also already exists so didn't create. But assuming it would look something like this...
+  #saveGameDynamoTable: 
+   # Type: AWS::DynamoDB::Table
+   # Properties: 
+   #   TableName: "voice-z-machine"
+   #   BillingMode: PAY_PER_REQUEST
+   #   AttributeDefinitions: 
+   #     - 
+   #       AttributeName: "UserId"
+   #       AttributeType: "S"
+   #     - 
+   #       AttributeName: "SelectedGameName"
+   #       AttributeType: "S"
+   #   KeySchema: 
+   #     - 
+   #       AttributeName: "UserId"
+   #       KeyType: "HASH"
+   
+  lambdaIAMRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - "sts:AssumeRole"
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+      Policies:
+        - PolicyName: "lambdaLogs"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Effect: "Allow"
+                Resource:
+                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/voice-z-machine-interpreter:*"
+        - PolicyName: "lambdaDynamo"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Action:
+                  - "dynamodb:PutItem"
+                  - "dynamodb:UpdateItem"
+                  - "dynamodb:DeleteItem"
+                  - "dynamodb:GetItem"
+                Effect: "Allow"
+                Resource:
+                  - !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/voice-z-machine"
+        - PolicyName: "lambdaS3Dynamo"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Action: "*"
+                Effect: Allow
+                Resource: !Join ['', ['arn:aws:s3:::', !Ref 'SaveGameBucketName', /*]]
+
+  lambdaLogGroup:
+    Type: "AWS::Logs::LogGroup"
+    Properties:
+      LogGroupName: "/aws/lambda/voice-z-machine-interpreter"
+      RetentionInDays: 90
+
+  #---CloudBuild and related roles/policies---
+  Project:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: voice-z-machine-api
+      Description: Voice-Z-Machine lambda function that invokes z-machine interpreter
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        Type: no_artifacts
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/nodejs:10.1.0
+      Source:
+        Type: GITHUB
+        Location: https://github.com/interpfister/voice-z-machine.git
+      TimeoutInMinutes: 10
+
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            Service: [codebuild.amazonaws.com]
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+        - PolicyName: CodeBuildAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                - 'logs:*'
+                - 'lambda:UpdateFunctionCode'
+                Effect: Allow
+                Resource: '*'
+
+Outputs:
+  apiGatewayInvokeURL:
+    Value: !Sub "https://${apiGateway}.execute-api.${AWS::Region}.amazonaws.com/prod"

@@ -1,61 +1,30 @@
-const makeStore = require("./store");
-const Actions = require("./actions");
-const subscribe = require("./subscriber");
 const downloadFileFromS3 = require("./s3-functions").downloadFileFromS3;
 const getSelectedGame = require("./dynamo-functions").getSelectedGame;
 const updateSelectedGame = require("./dynamo-functions").updateSelectedGame;
 const debug = require("debug")("index");
 const errorDebug = require("debug")("error");
-const ua = require("universal-analytics");
 const interpreter = require("./interpreter");
 
-const invokeShell = (
-  done,
-  query,
-  saveFilename,
-  newFile = false,
-  selectedGame
-) => {
+const invokeShell = (query, saveFilename, newFile = false, selectedGame) => {
   //Restore the default template if it's a new file
   const filenameToRestore = newFile ? `${selectedGame}_default` : saveFilename;
 
-  interpreter(selectedGame, filenameToRestore, saveFilename, query, done);
+  return interpreter(selectedGame, filenameToRestore, saveFilename, query);
 };
 
-exports.handler = (event, context, callback) => {
+exports.handler = async (event, context) => {
   debug("START: Received event:", JSON.stringify(event, null, 2));
-
   let gaParams = { documentPath: "/start" };
   const startTime = new Date();
 
-  const failsafeTimeout = setTimeout(() => {
-    errorDebug("Response timed out for query", event);
-    done(
-      `Sorry - I couldn't respond in time. Please try your command again.`,
-      true
-    );
-  }, process.env.FAILSAFE_TIMEOUT || 5000);
-
-  const done = (speech, err) => {
-    typeof failsafeTimeout === "function" && failsafeTimeout(); //deactivate timeout
-
-    gaParams.pageLoadTime = new Date() - startTime;
-    const visitor = ua(process.env.GA_TRACKING_ID, gaParams.uid, {
-      strictCidFormat: false
-    });
-
-    const gaCallback = gaErr => gaErr && debug(`GA ERROR: ${gaErr}`);
-    err
-      ? visitor.exception(gaParams, gaCallback)
-      : visitor.pageview(gaParams, gaCallback);
-
-    callback(null, {
+  const wrapUp = async (speech, err) => {
+    return {
       statusCode: err ? "400" : "200",
       body: JSON.stringify({ speech }),
       headers: {
         "Content-Type": "application/json"
       }
-    });
+    };
   };
 
   const body = JSON.parse(event.body);
@@ -165,44 +134,46 @@ exports.handler = (event, context, callback) => {
           );
         }
       } else {
-        getSelectedGame(username)
-          .then(selectedGame => {
-            if (!selectedGame) {
-              updateSelectedGame(username, "anchorhead")
-                .then(() => {
-                  done(
-                    `We'll start you playing Anchorhead, but you can change games at any time by saying: 'change game to' one of the following: ${gameNames}`
-                  );
-                })
-                .catch(err =>
-                  done(`Error updating selected game name in dynamo: ${err}`)
-                );
-            } else if (query.includes("start")) {
-              // This is if the user said start even though they already have a game selected
-              done(
-                `You're playing ${selectedGame}. Say a command like 'look' or 'west' to get started.`
-              );
-            } else {
-              const saveFilename = `${source}_${username}_${selectedGame}`;
+        return wrapUp(await invokeShell(query, "test", true, "anchorhead"));
+        //return wrapUp("got here");
+        // getSelectedGame(username)
+        //   .then(selectedGame => {
+        //     if (!selectedGame) {
+        //       updateSelectedGame(username, "anchorhead")
+        //         .then(() => {
+        //           done(
+        //             `We'll start you playing Anchorhead, but you can change games at any time by saying: 'change game to' one of the following: ${gameNames}`
+        //           );
+        //         })
+        //         .catch(err =>
+        //           done(`Error updating selected game name in dynamo: ${err}`)
+        //         );
+        //     } else if (query.includes("start")) {
+        //       // This is if the user said start even though they already have a game selected
+        //       done(
+        //         `You're playing ${selectedGame}. Say a command like 'look' or 'west' to get started.`
+        //       );
+        //     } else {
+        //       const saveFilename = `${source}_${username}_${selectedGame}`;
 
-              gaParams.uid = `${source}-${username}`;
-              gaParams.documentPath = `/${selectedGame}/${encodeURI(query)}`;
+        //       gaParams.uid = `${source}-${username}`;
+        //       gaParams.documentPath = `/${selectedGame}/${encodeURI(query)}`;
 
-              downloadFileFromS3(saveFilename)
-                .then(() =>
-                  invokeShell(done, query, saveFilename, false, selectedGame)
-                )
-                .catch(() =>
-                  invokeShell(done, query, saveFilename, true, selectedGame)
-                );
-            }
-          })
-          .catch(err =>
-            done(`Error getting selected game name in dynamo: ${err}`)
-          );
+        //       //downloadFileFromS3(saveFilename)
+        //       //  .then(() =>
+        //       //    invokeShell(done, query, saveFilename, false, selectedGame)
+        //       //  )
+        //       //  .catch(() =>
+        //           invokeShell(done, query, saveFilename, true, selectedGame)
+        //       //  );
+        //     }
+        //   })
+        //   .catch(err =>
+        //     wrapUp(`Error getting selected game name in dynamo: ${err}`)
+        //   );
       }
       break;
     default:
-      done(new Error(`Unsupported method "${event.httpMethod}"`));
+      return wrapUp("Error", `Unsupported method "${event.httpMethod}"`);
   }
 };
