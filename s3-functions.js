@@ -1,48 +1,51 @@
-const s3 = require('s3');
-const debug = require('debug')('s3');
+const s3 = require("s3");
+const debug = require("debug")("s3");
 
 const client = s3.createClient({
   s3Options: {
-    region: 'us-east-1',
+    region: "us-east-1"
   }
 });
 
-const createParams = (filename) => {
+const createParams = filename => {
   return {
     localFile: `/tmp/${filename}`,
     s3Params: {
       Bucket: "voice-z-machine",
-      Key: filename,
-    },
+      Key: filename
+    }
   };
-}
+};
 
-const handleS3EventEmitter = (emitter) => {
+const handleS3EventEmitter = emitter => {
   return new Promise((resolve, reject) => {
-    emitter.on('error', function(err) {
+    emitter.on("error", function(err) {
       debug("error:", err.stack);
       reject(err.stack);
     });
-    emitter.on('progress', function() {
+    emitter.on("progress", function() {
       // console.log("progress", emitter.progressTotal);
     });
-    emitter.on('end', function() {
+    emitter.on("end", function() {
       debug("done download/upload");
-      resolve('done download/upload');
+      resolve("done download/upload");
     });
   });
-}
+};
 
+const uploadFileToS3 = filename => {
+  return handleS3EventEmitter(
+    client.uploadFile(createParams(`${filename}.glksave`))
+  );
+};
 
-const uploadFileToS3 = (filename) => {
-  return handleS3EventEmitter(client.uploadFile(createParams(`${filename}.glksave`)));
-}
-
-const downloadFileFromS3 = (filename) => {
-  return handleS3EventEmitter(client.downloadFile(createParams(`${filename}.glksave`)));
-}
+const downloadFileFromS3 = filename => {
+  return handleS3EventEmitter(
+    client.downloadFile(createParams(`${filename}.glksave`))
+  );
+};
 
 module.exports = {
   uploadFileToS3,
   downloadFileFromS3
-}
+};
