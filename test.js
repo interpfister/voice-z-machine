@@ -15,7 +15,7 @@ const body = {
     source: "google",
     data: {
       user: {
-        userId: "test-user"
+        userId: "d9IOR"
       }
     }
   }
