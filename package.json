@@ -10,6 +10,7 @@
     "cross-spawn": "^5.1.0",
     "debug": "^3.1.0",
     "express": "^4.16.2",
+    "frotz-interfacer": "^1.4.1",
     "ifvms": "^1.1.2",
     "reduce-reducers": "^0.1.2",
     "redux": "^3.7.2",
