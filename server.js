@@ -8,6 +8,12 @@ const jsonParser = bodyParser.json();
 
 app.get("/", (req, res) => res.send("Hello World!"));
 
+app.get("/slack-install", (req, res) =>
+  res.redirect(
+    "https://slack.com/oauth/authorize?client_id=269195122228.272201929431&scope=bot"
+  )
+);
+
 app.post("/", jsonParser, (req, res) => {
   const body = req.body;
   const event = {
