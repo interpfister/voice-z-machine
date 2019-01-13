@@ -6,8 +6,7 @@ const uploadFileToS3 = require("./s3-functions").uploadFileToS3;
 
 const GAME_FILENAMES = {
   anchorhead: "games/anchor.z8",
-  lostpig: "games/lostpig.z8",
-  photopia: "games/photopia.z5"
+  lostpig: "games/lostpig.z8"
 };
 
 module.exports = async (
@@ -36,6 +35,7 @@ module.exports = async (
   });
 
   interfacer.iteration(query, async (error, output) => {
+    debug("GOT HERE");
     if (error && error.error) {
       done(error.error);
     } else {

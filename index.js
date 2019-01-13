@@ -114,10 +114,6 @@ exports.handler = (event, context, callback) => {
         {
           name: "lostpig",
           alternates: ["lost pig"]
-        },
-        {
-          name: "photopia",
-          alternates: ["photo pia", "four topia"]
         }
       ];
       const gameNames = AVAILABLE_GAMES.map(game => game.name).join(", ");

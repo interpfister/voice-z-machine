@@ -21,7 +21,6 @@ Google Assistant is especially cool because you can play while walking around us
 Three games currently supported. Pull requests welcome for more. Props to the original game authors:
 
 - [Lost Pig](http://ifdb.tads.org/viewgame?id=mohwfk47yjzii14w) by Admiral Jota
-- [Photopia](http://ifdb.tads.org/viewgame?id=ju778uv5xaswnlpl) by Adam Cadre
 - [Anchorhead](http://ifdb.tads.org/viewgame?id=op0uw1gn1tjqmjt7) by Michael Gentry
 
 See my [Medium Post](https://medium.com/@interpfister/interactive-audiobooks-playing-text-adventure-games-with-your-voice-using-google-assistant-heroku-9c565acf4072) for more background.
