@@ -81,7 +81,7 @@ exports.handler = (event, context, callback) => {
         body.originalRequest.data.user &&
         body.originalRequest.data.user.userId
       ) {
-        username = body.originalRequest.data.user.userId.slice(-5); //Regular ID is too long so just use last 5 characters
+        username = body.originalRequest.data.user.userId.slice(-8); //Regular ID is too long so just use bit
       } else if (
         source.includes("slack") &&
         body.originalRequest.data &&
