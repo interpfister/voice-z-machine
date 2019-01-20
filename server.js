@@ -6,7 +6,7 @@ const debug = require("debug")("server");
 
 const jsonParser = bodyParser.json();
 
-app.get("/", (req, res) => res.send("Hello World!"));
+app.use(express.static("public"));
 
 app.get("/slack-install", (req, res) =>
   res.redirect(
